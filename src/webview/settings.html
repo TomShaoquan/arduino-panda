@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino 设置</title>
+    <style>
+        body {
+            padding: 10px;
+            color: var(--vscode-foreground);
+            font-family: var(--vscode-font-family);
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        select {
+            width: 100%;
+            padding: 4px;
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border);
+        }
+        button {
+            padding: 4px;
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: var(--vscode-button-hoverBackground);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="setting-group">
+            <label>串口:</label>
+            <select id="portSelect"></select>
+            <button onclick="refreshPorts()">刷新串口列表</button>
+        </div>
+        <div class="setting-group">
+            <label>开发板:</label>
+            <select id="boardSelect"></select>
+            <button onclick="refreshBoards()">刷新开发板列表</button>
+        </div>
+        <div class="setting-item">
+            <label for="compileMode">编译模式:</label>
+            <select id="compileMode" class="setting-input">
+                <option value="single">单文件模式</option>
+                <option value="multi">多文件模式</option>
+            </select>
+            <div class="setting-description">
+                单文件模式：编译选中文件<br>
+                多文件模式：编译目录中所有文件
+            </div>
+        </div>
+    </div>
+    <script>
+        const vscode = acquireVsCodeApi();
+        
+        // 初始化设置
+        vscode.postMessage({ type: 'getInitialData' });
+
+        // 监听来自扩展的消息
+        window.addEventListener('message', event => {
+            const message = event.data;
+            switch (message.type) {
+                case 'updateSettings':
+                    updatePortSelect(message.ports, message.currentPort);
+                    updateBoardSelect(message.boards, message.currentBoard);
+                    break;
+                case 'updatePorts':
+                    updatePortSelect(message.ports);
+                    break;
+                case 'updateBoards':
+                    updateBoardSelect(message.boards);
+                    break;
+                case 'configuration':
+                    if (message.key === 'compileMode') {
+                        compileModeSelect.value = message.value || 'single';
+                    }
+                    break;
+            }
+        });
+
+        function updatePortSelect(ports, currentPort) {
+            const select = document.getElementById('portSelect');
+            select.innerHTML = '<option value="">请选择串口</option>';
+            ports.forEach(port => {
+                const option = document.createElement('option');
+                option.value = port.port;
+                option.text = `${port.port} - ${port.description || ''}`;
+                if (currentPort === port.port) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function updateBoardSelect(boards, currentBoard) {
+            const select = document.getElementById('boardSelect');
+            select.innerHTML = '<option value="">请选择开发板</option>';
+            boards.forEach(board => {
+                const option = document.createElement('option');
+                option.value = board.fqbn;
+                option.text = board.name;
+                if (currentBoard === board.fqbn) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('portSelect').addEventListener('change', (e) => {
+            vscode.postMessage({
+                type: 'portSelected',
+                value: e.target.value
+            });
+        });
+
+        document.getElementById('boardSelect').addEventListener('change', (e) => {
+            vscode.postMessage({
+                type: 'boardSelected',
+                value: e.target.value
+            });
+        });
+
+        function refreshPorts() {
+            vscode.postMessage({ type: 'refreshPorts' });
+        }
+
+        function refreshBoards() {
+            vscode.postMessage({ type: 'refreshBoards' });
+        }
+
+        // 初始化编译模式选择
+        const compileModeSelect = document.getElementById('compileMode');
+        vscode.postMessage({ type: 'getConfiguration', key: 'compileMode' });
+
+        // 监听编译模式变化
+        compileModeSelect.addEventListener('change', () => {
+            vscode.postMessage({
+                type: 'updateConfiguration',
+                key: 'compileMode',
+                value: compileModeSelect.value
+            });
+        });
+    </script>
+</body>
+</html> 

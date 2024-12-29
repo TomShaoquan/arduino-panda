@@ -1,0 +1,175 @@
+{
+  "name": "arduino-panda",
+  "displayName": "Arduino Panda",
+  "description": "arduino 开发",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "publisher": "TomShaoquan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TomShaoquan/arduino-panda"
+  },
+  "keywords": [
+    "arduino",
+    "embedded",
+    "iot",
+    "compile",
+    "upload"
+  ],
+  "categories": [
+    "Programming Languages",
+    "Debuggers",
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/*.ino",
+    "onLanguage:arduino"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "arduino-panda.helloWorld",
+        "title": "Hello World",
+        "description": "Shows a Hello World message"
+      },
+      {
+        "command": "arduino-panda.compileArduino",
+        "title": "Arduino: 编译程序",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "arduino-panda.uploadArduino",
+        "title": "Arduino: 上传程序",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "arduino-panda.selectPort",
+        "title": "Arduino: Select Port"
+      },
+      {
+        "command": "arduino-panda.selectBoard",
+        "title": "Arduino: Select Board"
+      },
+      {
+        "command": "arduino-panda.compileAndUpload",
+        "title": "Arduino: 编译并上传",
+        "icon": "$(zap)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceExtname == .ino",
+          "command": "arduino-panda.compileArduino",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .ino",
+          "command": "arduino-panda.uploadArduino",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .ino",
+          "command": "arduino-panda.compileAndUpload",
+          "group": "navigation"
+        }
+      ]
+    },
+    "icons": {
+      "arduino-compile": {
+        "description": "Compile Arduino sketch",
+        "default": {
+          "fontPath": "./resources/arduino-icons.woff",
+          "fontCharacter": "\\E001"
+        }
+      },
+      "arduino-upload": {
+        "description": "Upload sketch to Arduino board",
+        "default": {
+          "fontPath": "./resources/arduino-icons.woff",
+          "fontCharacter": "\\E002"
+        }
+      }
+    },
+    "configuration": {
+      "title": "Arduino Panda",
+      "properties": {
+        "arduino-panda.buildPath": {
+          "type": "string",
+          "default": "${workspaceFolder}/build",
+          "description": "Arduino 编译输出目录"
+        },
+        "arduino-panda.arduinoPath": {
+          "type": "string",
+          "default": "",
+          "description": "Arduino IDE 安装路径"
+        },
+        "arduino-panda.cliPath": {
+          "type": "string",
+          "default": "arduino-cli",
+          "description": "Arduino CLI 可执行文件的路径"
+        },
+        "arduino-panda.board": {
+          "type": "string",
+          "default": "",
+          "description": "选中的 Arduino 开发板 FQBN"
+        },
+        "arduino-panda.port": {
+          "type": "string",
+          "default": "",
+          "description": "选中的串口"
+        },
+        "arduino-panda.compileMode": {
+          "type": "string",
+          "enum": ["single", "multi"],
+          "default": "single",
+          "enumDescriptions": [
+            "单文件模式 - 编译选中的单个文件",
+            "多文件模式 - 编译整个文件夹"
+          ],
+          "description": "Arduino 编译模式"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "arduino-panda",
+          "title": "Arduino Panda",
+          "icon": "./resources/panda.svg"
+        }
+      ]
+    },
+    "views": {
+      "arduino-panda": [
+        {
+          "id": "arduino-panda-settings",
+          "name": "Arduino Settings",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^9.16.0",
+    "typescript": "^5.7.2",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
